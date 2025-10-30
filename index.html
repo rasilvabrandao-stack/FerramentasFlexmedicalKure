@@ -1,0 +1,243 @@
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Controle de Ferramentas - Kure Fleximedical</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="database.js"></script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-1px);
+        }
+        .input-field, .select-field { /* Estilo unificado */
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s ease;
+            color: #1f2937;
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+        }
+        .input-field:focus, .select-field:focus {
+            background: rgba(255, 255, 255, 1);
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            outline: none;
+        }
+        .success-message {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            border: 1px solid #b8daff; color: #155724;
+        }
+        .error-message {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            border: 1px solid #f5c6cb; color: #721c24;
+        }
+        .warning-message {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            border: 1px solid #ffeaa7; color: #856404;
+        }
+        .form-section {
+            background: rgba(255, 255, 255, 0.8); border-radius: 1rem;
+            padding: 1.5rem; margin-bottom: 1.5rem; border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        .section-title {
+            color: #374151; font-size: 1.25rem; font-weight: 600;
+            margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem;
+        }
+        /* Estilos para o toggle de Horas/Dias */
+        .toggle-btn {
+            cursor: pointer; padding: 0.5rem 1rem; border: 1px solid #ccc;
+            background-color: #f0f0f0; transition: all 0.2s ease;
+        }
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white; border-color: #667eea;
+        }
+        @media (min-width: 1024px) {
+            .form-container { max-width: 1200px; margin: 0 auto; }
+            .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+            .full-width { grid-column: 1 / -1; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-600 to-blue-600">
+
+    <header class="p-6 mb-8">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <div class="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center">
+                        <i class="fas fa-tools text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-white">Kure Fleximedical</h1>
+                        <p class="text-white/80">Sistema de Controle de Ferramentas</p>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <a href="painel.html" class="btn-secondary text-white px-6 py-3 rounded-lg font-semibold">
+                        <i class="fas fa-cog mr-2"></i>Painel Admin
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-6xl mx-auto px-4 pb-8">
+        <div class="form-container rounded-3xl p-8 mb-6">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold gradient-text mb-2">Registro de Ferramentas</h2>
+                <p class="text-gray-600">Preencha o formulário para registrar a retirada de ferramentas</p>
+            </div>
+
+            <form id="ferramentaForm" class="form-grid">
+                <div class="form-section full-width">
+                    <div class="section-title"><i class="fas fa-user-circle text-purple-500"></i><span>Informações do Solicitante</span></div>
+                    <label for="solicitante" class="block text-sm font-medium text-gray-700 mb-1">Solicitante <span class="text-red-500">*</span></label>
+                    <select id="solicitante" name="solicitante" required class="select-field">
+                        <option value="" disabled selected>Selecione um solicitante</option>
+                    </select>
+                </div>
+
+
+
+                <div class="form-section full-width">
+                    <div class="section-title"><i class="fas fa-tools text-purple-500"></i><span>Informações da Ferramenta</span></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="ferramenta" class="block text-sm font-medium text-gray-700 mb-1">Ferramenta <span class="text-red-500">*</span></label>
+                            <select id="ferramenta" name="ferramenta" required class="select-field">
+                                <option value="" disabled selected>Selecione uma ferramenta</option>
+                            </select>
+                        </div>
+                        <div>
+                             <label for="patrimonio" class="block text-sm font-medium text-gray-700 mb-1">Patrimônio (Opcional)</label>
+                             <select id="patrimonio" name="patrimonio" class="select-field">
+                                <option value="" selected>Qualquer unidade disponível</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section full-width">
+                    <div class="section-title"><i class="fas fa-calendar-alt text-purple-500"></i><span>Datas e Horários</span></div>
+
+                    <!-- Botões toggle logo abaixo do título -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Previsão de Devolução:</label>
+                        <div class="flex rounded-md shadow-sm">
+                            <button type="button" id="btnDevolucaoHoras" class="toggle-btn rounded-l-md active">Horas</button>
+                            <button type="button" id="btnDevolucaoDias" class="toggle-btn rounded-r-md">Dias</button>
+                        </div>
+                    </div>
+
+                    <!-- Campos de Retirada e Devolução -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label for="dataRetirada" class="block text-sm font-medium text-gray-700 mb-1">Data de Retirada <span class="text-red-500">*</span></label>
+                            <input type="date" id="dataRetirada" name="dataRetirada" required class="input-field">
+                        </div>
+                        <div>
+                            <label for="horaRetirada" class="block text-sm font-medium text-gray-700 mb-1">Hora de Retirada <span class="text-red-500">*</span></label>
+                            <input type="time" id="horaRetirada" name="horaRetirada" required class="input-field">
+                        </div>
+                        <div id="devolucaoHorasContainer">
+                            <label for="horaDevolucao" class="block text-sm font-medium text-gray-700 mb-1">Hora de Devolução <span class="text-red-500">*</span></label>
+                            <input type="time" id="horaDevolucao" name="horaDevolucao" required class="input-field">
+                        </div>
+                        <div id="devolucaoDiasContainer" style="display: none;">
+                            <label for="dataDevolucao" class="block text-sm font-medium text-gray-700 mb-1">Dia de Devolução <span class="text-red-500">*</span></label>
+                            <input type="date" id="dataDevolucao" name="dataDevolucao" required class="input-field">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="full-width text-center mt-6">
+                    <button type="button" id="submitBtn" class="btn-primary text-white font-bold py-3 px-8 rounded-xl">
+                        <i class="fas fa-paper-plane mr-2"></i>Enviar Solicitação
+                    </button>
+                </div>
+            </form>
+            
+            <div id="mensagem" class="mt-4 p-4 rounded-lg text-center font-semibold"></div>
+        </div>
+
+  
+  <!-- Dashboard -->
+        <div class="glass-effect rounded-3xl p-8">
+            <h3 class="text-2xl font-bold text-white mb-6 text-center">Dashboard de Ferramentas</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <div class="bg-white/10 rounded-2xl p-6 text-center border border-white/20">
+                    <div class="w-16 h-16 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-boxes text-white text-2xl"></i>
+                    </div>
+                    <h4 class="text-lg font-semibold text-white mb-2">Ferramentas no Estoque</h4>
+                    <p id="estoqueCount" class="text-3xl font-bold text-white">0</p>
+                </div>
+                <div class="bg-white/10 rounded-2xl p-6 text-center border border-white/20">
+                    <div class="w-16 h-16 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-tools text-white text-2xl"></i>
+                    </div>
+                    <h4 class="text-lg font-semibold text-white mb-2">Ferramentas em Uso</h4>
+                    <p id="usoCount" class="text-3xl font-bold text-white">0</p>
+                </div>
+                <div class="bg-white/10 rounded-2xl p-6 text-center border border-white/20">
+                    <div class="w-16 h-16 bg-gradient-to-r from-red-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-exclamation-triangle text-white text-2xl"></i>
+                    </div>
+                    <h4 class="text-lg font-semibold text-white mb-2">Ferramentas Quebradas</h4>
+                    <p id="quebradasCount" class="text-3xl font-bold text-white">0</p>
+                </div>
+            </div>
+            <div class="text-center flex flex-col sm:flex-row gap-4 justify-center">
+                <button onclick="baixarExcelCompleto()" class="btn-secondary text-white px-6 py-3 rounded-lg font-semibold">
+                    <i class="fas fa-download mr-2"></i>Baixar Relatório Excel
+                </button>
+                <a href="https://docs.google.com/spreadsheets/d/1HEQglGYqR1kAf8Ln7KZMT7f1kaBdKQDmJWXRjs15kHY/edit?gid=111010543#gid=111010543" target="_blank" class="btn-secondary text-white px-6 py-3 rounded-lg font-semibold inline-flex items-center">
+                    <i class="fas fa-external-link-alt mr-2"></i>Abrir Google Sheets
+                </a>
+            </div>
+        </div>
+    </div>
+
+
+
+</body>
+</html>
+</html>

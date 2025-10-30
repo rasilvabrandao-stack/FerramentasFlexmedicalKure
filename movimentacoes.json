@@ -1,0 +1,12 @@
+[
+  {
+    "id": 1,
+    "dataRetirada": "2025-10-28",
+    "ferramenta": "Furadeira",
+    "patrimonio": "PAT001",
+    "solicitante": "TESTE USUARIO",
+    "tipo": "retirada",
+    "temRetorno": "sim",
+    "dataRegistro": "2025-10-28T14:20:00.000Z"
+  }
+]

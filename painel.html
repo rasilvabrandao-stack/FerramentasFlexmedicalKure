@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Control Panel - Kure Fleximedical</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="database.js"></script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+    <style> 
+        body {  
+            font-family: 'Inter', sans-serif;  
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+        } 
+        .glass-effect { 
+            background: rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+        } 
+        .card-hover { 
+            transition: all 0.3s ease; 
+        } 
+        .card-hover:hover { 
+            transform: translateY(-5px); 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+        } 
+        .gradient-text { 
+            background: linear-gradient(135deg, #667eea, #764ba2); 
+            -webkit-background-clip: text; 
+            -webkit-text-fill-color: transparent; 
+            background-clip: text; 
+        } 
+        .pulse-animation { 
+            animation: pulse 2s infinite; 
+        } 
+        @keyframes pulse { 
+            0%, 100% { opacity: 1; } 
+            50% { opacity: 0.7; } 
+        } 
+        .login-container { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(20px); 
+            border-radius: 20px; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
+        } 
+        .tool-card { 
+            background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(250,250,250,0.95) 100%); 
+            border: 1px solid rgba(255,255,255,0.3); 
+            transition: all 0.3s ease; 
+        } 
+        .tool-card:hover { 
+            transform: translateY(-3px); 
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); 
+        } 
+        .notification-emprestimo { 
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%); 
+            border-left: 4px solid #2196f3; 
+        } 
+        .notification-quebrada { 
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%); 
+            border-left: 4px solid #f44336; 
+        } 
+        .btn-primary { 
+            background: linear-gradient(135deg, #667eea, #764ba2); 
+            transition: all 0.3s ease; 
+        } 
+        .btn-primary:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4); 
+        } 
+        .btn-danger { 
+            background: linear-gradient(135deg, #f093fb, #f5576c); 
+            transition: all 0.3s ease; 
+        } 
+        .btn-danger:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 10px 25px rgba(245, 87, 108, 0.4); 
+        } 
+        .modal-overlay { 
+            background: rgba(0, 0, 0, 0.5); 
+            backdrop-filter: blur(5px); 
+        } 
+        .modal-content { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(20px); 
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+        } 
+    </style> 
+<base target="_blank"> 
+</head> 
+<body class="bg-gradient-to-br from-purple-600 to-blue-600"> 
+    <!-- LOGIN --> 
+    <div id="login" class="min-h-screen flex items-center justify-center p-4"> 
+        <div class="login-container p-8 max-w-md w-full"> 
+            <div class="text-center mb-8"> 
+                <div class="w-20 h-20 mx-auto mb-4 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center"> 
+                    <i class="fas fa-tools text-white text-2xl"></i> 
+                </div> 
+                <h1 class="text-2xl font-bold gradient-text">Kure Fleximedical</h1> 
+                <p class="text-gray-600 mt-2">Control Panel</p>
+            </div> 
+             
+            <div class="space-y-4"> 
+                <div> 
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Usuário</label> 
+                    <input type="text" id="usuario" placeholder="Digite seu usuário"  
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"/> 
+                </div> 
+                <div> 
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Senha</label> 
+                    <input type="password" id="senha" placeholder="Digite sua senha"  
+                           class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"/> 
+                </div> 
+                <button id="btnLogin" class="w-full btn-primary text-white py-3 rounded-lg font-semibold"> 
+                    <i class="fas fa-sign-in-alt mr-2"></i>Entrar 
+                </button> 
+                <p id="mensagemLogin" class="text-red-500 text-center text-sm mt-2"></p> 
+            </div> 
+        </div> 
+    </div> 
+ 
+    <!-- PAINEL PRINCIPAL --> 
+    <div id="painel" class="hidden min-h-screen p-4"> 
+        <!-- Header --> 
+        <header class="glass-effect rounded-2xl p-6 mb-6"> 
+            <div class="flex items-center justify-between"> 
+                <div class="flex items-center space-x-4"> 
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center"> 
+                        <i class="fas fa-tools text-white text-xl"></i> 
+                    </div> 
+                    <div> 
+                        <h1 class="text-2xl font-bold text-white">Painel de Controle</h1> 
+                        <p class="text-white/80">Kure Fleximedical - Gerenciamento de Ferramentas</p> 
+                    </div> 
+                </div> 
+                <div class="flex space-x-3">
+                    <button onclick="abrirModal('modalFerramenta')" class="btn-primary px-4 py-2 rounded-lg text-white font-medium">
+                        <i class="fas fa-plus mr-2"></i>Ferramenta
+                    </button>
+
+                    <button onclick="abrirModal('modalPlanilhas')" class="btn-primary px-4 py-2 rounded-lg text-white font-medium">
+                        <i class="fas fa-table mr-2"></i>Relatórios
+                    </button>
+
+                    <button onclick="window.location.href='index.html'" class="btn-primary px-4 py-2 rounded-lg text-white font-medium">
+                        <i class="fas fa-arrow-left mr-2"></i>Voltar ao Formulário
+                    </button>
+
+                </div>
+            </div> 
+        </header>
+
+        <!-- Estoque de Ferramentas -->
+        <div class="glass-effect rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-white mb-4">
+                <i class="fas fa-boxes-stacked mr-2"></i>Estoque de Ferramentas
+            </h2>
+            <div id="estoqueDiv" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+
+
+
+        <!-- Devolução de Ferramentas -->
+        <div class="glass-effect rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-white mb-4">
+                <i class="fas fa-undo-alt mr-2"></i>Devolução de Ferramentas
+            </h2>
+            <form id="devolucaoForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Ferramenta em Uso</label>
+                        <select id="ferramentaDevolucaoSelect" required
+                            class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Patrimônio</label>
+                        <select id="patrimonioDevolucaoSelect"
+                            class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Data de Devolução</label>
+                        <input type="date" id="dataDevolucao" required
+                            class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Hora de Devolução</label>
+                        <input type="time" id="horaDevolucao" required
+                            class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary px-6 py-3 rounded-lg text-white font-medium">
+                    <i class="fas fa-check  mr-2"></i>Registrar Devolução
+                </button>
+            </form>
+            <p id="feedbackDevolucao" class="mt-4 font-semibold text-white bg-white/10 p-3 rounded-lg hidden"></p>
+        </div>
+
+        <!-- Movimentações -->
+        <div class="glass-effect rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-white mb-4">
+                <i class="fas fa-exchange-alt mr-2"></i>Movimentações (Ferramentas Quebradas)
+            </h2>
+            <form id="movimentacaoForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Solicitante</label>
+                        <select id="solicitanteSelect" required
+                            class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Tipo de Movimentação</label>
+                        <select id="tipoMovimentacao" required
+                            class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                            <option value="">Selecione o tipo</option>
+                            <option value="quebrada">Ferramenta Quebrada</option>
+                        </select>
+                    </div>
+                </div>
+
+
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Ferramenta</label>
+                        <select id="ferramentaSelect" required
+                            class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Patrimônio</label>
+                        <select id="patrimonioSelect" required
+                            class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Data de Retirada</label>
+                        <input type="date" id="dataSaida" required
+                            class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Hora de Retirada</label>
+                        <input type="time" id="horaSaida" required
+                            class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Data de Retorno</label>
+                        <input type="date" id="dataRetorno"
+                            class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Hora de Retorno</label>
+                        <input type="time" id="horaRetorno"
+                            class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-white mb-2">Tem Retorno?</label>
+                        <div>
+                            <label><input type="radio" name="temRetorno" value="sim" checked> Sim</label>
+                            <label class="ml-4"><input type="radio" name="temRetorno" value="nao"> Não</label>
+                        </div>
+                    </div>
+                    <div id="observacaoContainer" style="display: none;">
+                        <label class="block text-sm font-medium text-white mb-2">Observação (por que não terá retorno)</label>
+                        <textarea id="observacao" name="observacao" rows="2" class="w-full px-4 py-3 bg-white/90 border border-white/20 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"></textarea>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary px-6 py-3 rounded-lg text-white font-medium">
+                    <i class="fas fa-save mr-2"></i>Registrar Movimentação
+                </button>
+            </form>
+            <p id="feedback" class="mt-4 font-semibold text-white bg-white/10 p-3 rounded-lg hidden"></p>
+        </div>
+
+
+
+        <!-- Solicitantes -->
+        <div class="glass-effect rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-white mb-4">
+                <i class="fas fa-users mr-2"></i>Solicitantes
+            </h2>
+            <div id="listaSolicitantes" class="space-y-2 mb-4"></div>
+            <button onclick="abrirModal('modalSolicitante')" class="btn-primary px-4 py-2 rounded-lg text-white font-medium">
+                <i class="fas fa-plus mr-2"></i>Adicionar Solicitante
+            </button>
+        </div>
+
+
+
+        <!-- Notificações -->
+        <div class="glass-effect rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-white mb-4">
+                <i class="fas fa-bell mr-2"></i>Notificações
+            </h2>
+            <button onclick="limparNotificacoes()" class="btn-primary px-4 py-2 rounded-lg text-white font-medium">
+                <i class="fas fa-trash mr-2"></i>Limpar Notificações
+            </button>
+            <div id="notificacoes" class="space-y-3"></div>
+        </div>
+
+        <!-- Dashboards de Análise -->
+        <div class="glass-effect rounded-2xl p-6 mb-6">
+            <h2 class="text-xl font-bold text-white mb-4">
+                <i class="fas fa-chart-line mr-2"></i>Dashboards de Análise
+            </h2>
+            <div id="dashboards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Charts will be rendered here -->
+            </div>
+        </div>
+    </div>
+
+  <!-- Modal for Add Ferramenta -->
+  <div id="modalFerramenta" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+    <div class="modal-content rounded-2xl p-6 max-w-md w-full">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold gradient-text">
+          <i class="fas fa-plus-circle mr-2"></i>Adicionar Ferramentas
+        </h2>
+        <button onclick="fecharModais()" class="text-gray-500 hover:text-gray-700 text-xl">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="formAddFerramenta" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Ferramentas (uma por linha)</label>
+          <textarea id="ferramentasBulk" placeholder="Formato: NomeFerramenta:patrimonio1,patrimonio2,patrimonio3&#10;Ex: Furadeira:001,002,003&#10;Martelo:004,005" required rows="6"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"></textarea>
+        </div>
+        <button type="submit" class="w-full btn-primary text-white py-3 rounded-lg font-semibold">
+          <i class="fas fa-save mr-2"></i>Salvar Ferramentas
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal for Add Solicitante -->
+  <div id="modalSolicitante" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+    <div class="modal-content rounded-2xl p-6 max-w-md w-full">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold gradient-text">
+          <i class="fas fa-user-plus mr-2"></i>Adicionar Solicitante
+        </h2>
+        <button onclick="fecharModais()" class="text-gray-500 hover:text-gray-700 text-xl">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <form id="formAddSolicitante" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Nome do Solicitante</label>
+          <input type="text" id="nomeSolicitante" placeholder="Ex: João Silva, Maria Santos, etc." required
+                 class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" />
+        </div>
+        <button type="submit" class="w-full btn-primary text-white py-3 rounded-lg font-semibold">
+          <i class="fas fa-save mr-2"></i>Salvar Solicitante
+        </button>
+      </form>
+    </div>
+  </div>
+
+
+
+
+
+  <!-- Modal for Excluir Ferramenta -->
+  <div id="modalExcluirFerramenta" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+    <div class="modal-content rounded-2xl p-6 max-w-md w-full">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold gradient-text">
+          <i class="fas fa-trash-alt mr-2"></i>Excluir Ferramenta
+        </h2>
+        <button onclick="fecharModais()" class="text-gray-500 hover:text-gray-700 text-xl">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <p class="text-gray-700">Escolha como deseja excluir a ferramenta:</p>
+        <div class="space-y-3">
+          <button id="btnExcluirTodaFerramenta" class="w-full btn-danger text-white py-3 rounded-lg font-semibold">
+            <i class="fas fa-trash mr-2"></i>Excluir Toda a Ferramenta
+          </button>
+          <button id="btnExcluirPatrimonio" class="w-full btn-danger text-white py-3 rounded-lg font-semibold">
+            <i class="fas fa-minus-circle mr-2"></i>Excluir Apenas um Patrimônio
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Selecionar Patrimônio para Exclusão -->
+  <div id="modalSelecionarPatrimonio" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+    <div class="modal-content rounded-2xl p-6 max-w-md w-full">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold gradient-text">
+          <i class="fas fa-list mr-2"></i>Selecionar Patrimônio
+        </h2>
+        <button onclick="fecharModais()" class="text-gray-500 hover:text-gray-700 text-xl">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-4">
+        <p class="text-gray-700">Selecione o patrimônio a ser excluído:</p>
+        <select id="selectPatrimonioExcluir" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+          <option value="">Selecione um patrimônio</option>
+        </select>
+        <button id="btnConfirmarExcluirPatrimonio" class="w-full btn-danger text-white py-3 rounded-lg font-semibold">
+          <i class="fas fa-trash mr-2"></i>Excluir Patrimônio
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal for Visualizar Planilhas -->
+  <div id="modalPlanilhas" class="fixed inset-0 modal-overlay hidden z-50 flex items-center justify-center p-4">
+    <div class="modal-content rounded-2xl p-6 max-w-7xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold gradient-text">
+          <i class="fas fa-file-excel mr-2"></i>Visualizar Planilhas
+        </h2>
+        <button onclick="fecharModais()" class="text-gray-500 hover:text-gray-700 text-xl">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="space-y-8">
+        <!-- Retiradas -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Retiradas (Ferramentas em Uso)</h3>
+          <div class="mb-4 flex flex-wrap gap-4">
+            <input type="text" id="filtroRetiradasFerramenta" placeholder="Filtrar por ferramenta" class="px-3 py-2 border border-gray-300 rounded-lg">
+            <input type="text" id="filtroRetiradasSolicitante" placeholder="Filtrar por solicitante" class="px-3 py-2 border border-gray-300 rounded-lg">
+            <input type="month" id="filtroRetiradasMes" class="px-3 py-2 border border-gray-300 rounded-lg">
+            <button onclick="filtrarRetiradas()" class="btn-primary px-4 py-2 rounded-lg text-white">Filtrar</button>
+            <button onclick="limparFiltrosRetiradas()" class="btn-danger px-4 py-2 rounded-lg text-white">Limpar Filtros</button>
+          </div>
+          <div id="kpisRetiradas" class="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+          <div id="tabelaRetiradas" class="overflow-x-auto border border-gray-300 rounded-lg mb-4"></div>
+        </div>
+        <!-- Devoluções -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Devoluções</h3>
+          <div class="mb-4 flex flex-wrap gap-4">
+            <input type="text" id="filtroDevolucoesFerramenta" placeholder="Filtrar por ferramenta" class="px-3 py-2 border border-gray-300 rounded-lg">
+            <input type="text" id="filtroDevolucoesSolicitante" placeholder="Filtrar por solicitante" class="px-3 py-2 border border-gray-300 rounded-lg">
+            <input type="month" id="filtroDevolucoesMes" class="px-3 py-2 border border-gray-300 rounded-lg">
+            <button onclick="filtrarDevolucoes()" class="btn-primary px-4 py-2 rounded-lg text-white">Filtrar</button>
+            <button onclick="limparFiltrosDevolucoes()" class="btn-danger px-4 py-2 rounded-lg text-white">Limpar Filtros</button>
+          </div>
+          <div id="kpisDevolucoes" class="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+          <div id="tabelaDevolucoes" class="overflow-x-auto border border-gray-300 rounded-lg mb-4"></div>
+          <button onclick="baixarDevolucoes()" class="btn-primary px-4 py-2 rounded-lg text-white">
+            <i class="fas fa-download mr-2"></i>Baixar Excel
+          </button>
+        </div>
+        <!-- Ferramentas Quebradas -->
+        <div>
+          <h3 class="text-lg font-semibold text-gray-700 mb-4">Ferramentas Quebradas</h3>
+          <div class="mb-4 flex flex-wrap gap-4">
+            <input type="text" id="filtroQuebradasFerramenta" placeholder="Filtrar por ferramenta" class="px-3 py-2 border border-gray-300 rounded-lg">
+            <input type="text" id="filtroQuebradasSolicitante" placeholder="Filtrar por solicitante" class="px-3 py-2 border border-gray-300 rounded-lg">
+            <input type="month" id="filtroQuebradasMes" class="px-3 py-2 border border-gray-300 rounded-lg">
+            <button onclick="filtrarQuebradas()" class="btn-primary px-4 py-2 rounded-lg text-white">Filtrar</button>
+            <button onclick="limparFiltrosQuebradas()" class="btn-danger px-4 py-2 rounded-lg text-white">Limpar Filtros</button>
+          </div>
+          <div id="kpisQuebradas" class="mb-4 grid grid-cols-2 md:grid-cols-4 gap-4"></div>
+          <div id="tabelaQuebradas" class="overflow-x-auto border border-gray-300 rounded-lg mb-4"></div>
+          <button onclick="baixarQuebradas()" class="btn-primary px-4 py-2 rounded-lg text-white">
+            <i class="fas fa-download mr-2"></i>Baixar Excel
+          </button>
+        </div>
+      </div>
+      <div class="mt-6 text-center">
+        <button onclick="baixarExcelCompleto()" class="btn-primary px-6 py-3 rounded-lg text-white font-semibold">
+          <i class="fas fa-file-excel mr-2"></i>Baixar Excel Completo (Múltiplas Abas)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzka9zfxb9UcVz2kVafIWmiYT12YHx0JPb3zPU8jU1PN4BuNzBXeVUe1bMxxqG21b6O0A/exec";
+    let estoque = [];
+    let movimentacoes = [];
+    let currentExcluirFerramentaIds = '';
+    let currentExcluirFerramentaNome = '';
+    const estoqueDiv = document.getElementById('estoqueDiv');
+    const solicitanteSelect = document.getElementById('solicitanteSelect');
+    const ferramentaSelect = document.getElementById('ferramentaSelect');
+    const patrimonioSelect = document.getElementById('patrimonioSelect');
+    const notificacoesDiv = document.getElementById('notificacoes');
+    const feedback = document.getElementById('feedback');
+    const mensagemLogin = document.getElementById('mensagemLogin');
+    const ferramentaDevolucaoSelect = document.getElementById('ferramentaDevolucaoSelect');
+    const patrimonioDevolucaoSelect = document.getElementById('patrimonioDevolucaoSelect');
+
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+      const user = document.getElementById('usuario').value.trim();
+      const pass = document.getElementById('senha').value.trim();
+      if (user === "admin" && pass === "1234") {
+        document.getElementById('login').classList.add('hidden');
+        document.getElementById('painel').classList.remove('hidden');
+        await window.dbManager.init();
+        await carregarDados();
+      } else {
+        mensagemLogin.textContent = "Usuário ou senha inválidos!";
+      }
+    });
+
+    function abrirModal(id) {
+      document.getElementById(id).classList.remove('hidden');
+    }
+    
+    function fecharModais() {
+      document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.classList.add('hidden');
+      });
+    }
+    
+    window.addEventListener('click', e => {
+      if (e.target.classList.contains('modal-overlay')) {
+        e.target.classList.add('hidden');
+      }
+    });
+
+    async function carregarDados() {
+      try {
+        estoque = await window.dbManager.ferramentas.obterTodas();
+        movimentacoes = await window.dbManager.movimentacoes.obterTodas();
+        atualizarEstoque();
+        await atualizarSolicitantes();
+        atualizarNotificacoes();
+        popularDevolucaoSelects();
+        await atualizarDashboard();
+
+        // Seed solicitantes from config if none exist
+        const solicitantesList = await window.dbManager.solicitantes.obterTodos();
+        if (solicitantesList.length === 0 && window.APP_CONFIG && window.APP_CONFIG.SOLICITANTES_INICIAIS) {
+          console.log('Seeding solicitantes from config...');
+          for (const nome of window.APP_CONFIG.SOLICITANTES_INICIAIS) {
+            await window.dbManager.solicitantes.adicionar({
+              nome: nome,
+              dataAdicao: new Date().toISOString()
+            });
+          }
+          await atualizarSolicitantes();
+        }
+      } catch (err) {
+        console.error("Erro ao carregar dados:", err);
+      }
+    }
+    // Make carregarDados global for the refresh button
+    window.carregarDados = carregarDados;
+
+    function popularDevolucaoSelects() {
+      const inUse = movimentacoes.filter(m => m.tipo !== 'quebrada' && m.temRetorno === 'sim' && (!m.dataRetorno || m.dataRetorno === ''));
+      const uniqueFerramentasInUse = [...new Set(inUse.map(m => m.ferramenta))];
+
+      ferramentaDevolucaoSelect.innerHTML = '<option value="">Selecione a ferramenta</option>';
+      uniqueFerramentasInUse.forEach(f => {
+        const opt = document.createElement('option');
+        opt.value = f;
+        opt.textContent = f;
+        ferramentaDevolucaoSelect.appendChild(opt);
+      });
+
+      patrimonioDevolucaoSelect.innerHTML = '<option value="">Selecione o patrimônio</option>';
+    }
+
+    function atualizarEstoque() {
+      estoqueDiv.innerHTML = '';
+      ferramentaSelect.innerHTML = '<option value="">Selecione a ferramenta</option>';
+
+      // Group ferramentas by nome to avoid duplicates
+      const groupedFerramentas = {};
+      estoque.forEach(item => {
+        if (!groupedFerramentas[item.nome]) {
+          groupedFerramentas[item.nome] = { ids: [], patrimonios: [] };
+        }
+        groupedFerramentas[item.nome].ids.push(item.id);
+        groupedFerramentas[item.nome].patrimonios.push(...item.patrimonios);
+      });
+
+      // Add grouped ferramentas
+      Object.keys(groupedFerramentas).forEach((nome, i) => {
+        const data = groupedFerramentas[nome];
+        const card = document.createElement('div');
+        card.className = 'tool-card rounded-xl p-4 card-hover';
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <h3 class="text-lg font-semibold gradient-text">${nome}</h3>
+            <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              Qtd: ${data.patrimonios.length}
+            </span>
+          </div>
+          <div class="mt-3 text-sm text-gray-600">
+            <p class="mb-2"><i class="fas fa-hashtag mr-1"></i>Patrimônios:</p>
+            <div class="flex flex-wrap gap-1">
+              ${data.patrimonios.map(p => `<span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">${p}</span>`).join('')}
+            </div>
+          </div>
+      <button class="mt-4 btn-danger text-white text-sm px-3 py-1 rounded-lg" onclick="excluirFerramenta('${nome.replace(/'/g, '\\\'')}')">
+        <i class="fas fa-trash-alt mr-1"></i>Remover
+      </button>
+        `;
+        estoqueDiv.appendChild(card);
+        if (data.patrimonios.length > 0) {
+      const opt = document.createElement('option');
+      opt.value = nome;
+      opt.textContent = nome;
+      ferramentaSelect.appendChild(opt);
+        }
+      });
+
+      // Create a set of existing ferramenta names
+      const existingFerramentas = new Set(Object.keys(groupedFerramentas));
+
+      // Add unique ferramenta names from movimentacoes that are not in estoque
+      const ferramentasFromMov = [...new Set(movimentacoes.map(m => m.ferramenta).filter(f => f && !existingFerramentas.has(f)))];
+      ferramentasFromMov.forEach(ferramenta => {
+        const opt = document.createElement('option');
+        opt.value = 'mov-' + ferramenta; // Prefix to distinguish
+        opt.textContent = ferramenta + ' (da movimentação)';
+        ferramentaSelect.appendChild(opt);
+      });
+    }
+
+
+
+
+    async function atualizarSolicitantes() {
+      const solicitantes = await window.dbManager.solicitantes.obterTodos();
+      solicitanteSelect.innerHTML = '<option value="">Selecione o solicitante</option>';
+      const listaSolicitantesDiv = document.getElementById('listaSolicitantes');
+      listaSolicitantesDiv.innerHTML = '';
+      solicitantes.forEach((s) => {
+        const opt = document.createElement('option');
+        opt.value = s.nome;
+        opt.textContent = s.nome;
+        solicitanteSelect.appendChild(opt);
+
+        const li = document.createElement('li');
+        li.className = 'glass-effect rounded-lg p-3 flex justify-between items-center';
+        li.innerHTML = `
+          <span class="text-white"><i class="fas fa-user mr-2"></i>${s.nome}</span>
+          <button class="btn-danger text-white text-sm px-3 py-1 rounded-lg" onclick="excluirSolicitante('${s.id}')">
+            <i class="fas fa-trash-alt mr-1"></i>Excluir
+          </button>
+        `;
+        listaSolicitantesDiv.appendChild(li);
+      });
+    }
+
+    async function excluirSolicitante(id) {
+      if (confirm("Excluir este solicitante?")) {
+        await window.dbManager.solicitantes.excluir(id);
+        await atualizarSolicitantes();
+      }
+    }
+
+async function excluirFerramenta(nome) {
+  if (confirm("Excluir esta ferramenta?")) {
+    const ferramentas = await window.dbManager.ferramentas.obterTodas();
+    const toRemove = ferramentas.filter(f => f.nome === nome);
+    for (const f of toRemove) {
+      await window.dbManager.ferramentas.remover(f.id);
+    }
+    carregarDados();
+  }
+}
+
+    async function excluirFerramentaCompleta(ids) {
+      if (confirm("Excluir toda a ferramenta?")) {
+        const idArray = ids.split(',');
+        for (const id of idArray) {
+          await window.dbManager.ferramentas.remover(id);
+        }
+        fecharModais();
+        carregarDados();
+      }
+    }
+
+    async function excluirPatrimonio(ferramentaNome, patrimonio) {
+      if (confirm(`Excluir o patrimônio ${patrimonio} da ferramenta ${ferramentaNome}?`)) {
+        await window.dbManager.patrimonios.remover(ferramentaNome, patrimonio);
+        fecharModais();
+        carregarDados();
+      }
+    }
+
+    ferramentaSelect.addEventListener('change', () => {
+      const val = ferramentaSelect.value;
+      patrimonioSelect.innerHTML = '<option value="">Patrimônio</option>';
+      if (val.startsWith('mov-')) {
+        // Ferramenta from movimentacoes
+        const ferramenta = val.substring(4); // Remove 'mov-' prefix
+        const patrimoniosFromMov = [...new Set(movimentacoes.filter(m => m.ferramenta === ferramenta).map(m => m.patrimonio).filter(p => p))];
+        patrimoniosFromMov.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p;
+          opt.textContent = p;
+          patrimonioSelect.appendChild(opt);
+        });
+  } else {
+    // Ferramenta from estoque
+    const ferr = estoque.find(f => f.nome === val);
+    if (ferr && ferr.patrimonios) {
+      ferr.patrimonios.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p;
+        opt.textContent = p;
+        patrimonioSelect.appendChild(opt);
+      });
+    }
+  }
+    });
+    
+    function atualizarNotificacoes() {
+      notificacoesDiv.innerHTML = '';
+      
+      // Mostrar movimentações como notificações
+      movimentacoes.forEach(mov => {
+        const card = document.createElement('div');
+        card.className = mov.tipo === 'quebrada' ? 
+          'notification-quebrada rounded-lg p-4 mb-3' : 
+          'notification-emprestimo rounded-lg p-4 mb-3';
+        
+        const icon = mov.tipo === 'quebrada' ? 
+          '<i class="fas fa-exclamation-triangle text-red-500 mr-2"></i>' : 
+          '<i class="fas fa-exchange-alt text-blue-500 mr-2"></i>';
+        
+        const status = mov.dataRetorno ? '(Devolvida)' : '(Em uso)';
+        
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <h3 class="text-lg font-medium">${icon}${mov.ferramenta}</h3>
+            <span class="text-xs text-gray-500">${mov.dataSaida || mov.data}</span>
+          </div>
+          <p class="mt-2 text-sm">
+            <i class="fas fa-user mr-1"></i> ${mov.solicitante} 
+            ${mov.tipo === 'quebrada' ? '(Quebrada)' : status}
+          </p>
+          <p class="text-sm text-gray-600 mt-1">
+            <i class="fas fa-folder mr-1"></i> ${mov.projeto || 'Sem projeto'}
+          </p>
+          ${mov.observacao ? `<p class="text-sm text-gray-600 mt-1"><i class="fas fa-note-sticky mr-1"></i>${mov.observacao}</p>` : ''}
+        `;
+        notificacoesDiv.appendChild(card);
+      });
+      
+      if (movimentacoes.length === 0) {
+        notificacoesDiv.innerHTML = '<p class="text-center text-gray-500 py-4">Nenhuma notificação</p>';
+      }
+    }
+
+    // Event listener for devolucao ferramenta change
+    ferramentaDevolucaoSelect.addEventListener('change', () => {
+      const f = ferramentaDevolucaoSelect.value;
+      const inUse = movimentacoes.filter(m => m.tipo !== 'quebrada' && (!m.dataRetorno || m.dataRetorno === ''));
+      patrimonioDevolucaoSelect.innerHTML = '<option value="">Selecione o patrimônio</option>';
+      if (f) {
+        const inUseForF = inUse.filter(m => m.ferramenta.toLowerCase() === f.toLowerCase()).map(m => m.patrimonio).filter(p => p);
+        [...new Set(inUseForF)].forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p;
+          opt.textContent = p;
+          patrimonioDevolucaoSelect.appendChild(opt);
+        });
+      }
+    });
+
+    // Devolucao form submit
+    document.getElementById('devolucaoForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const ferramenta = ferramentaDevolucaoSelect.value;
+      const patrimonio = patrimonioDevolucaoSelect.value;
+      const dataRetorno = document.getElementById('dataDevolucao').value;
+      const horaRetorno = document.getElementById('horaDevolucao').value;
+
+      if (!ferramenta || !patrimonio || !dataRetorno || !horaRetorno) {
+        feedbackDevolucao.textContent = 'Preencha todos os campos obrigatórios.';
+        feedbackDevolucao.classList.remove('hidden');
+        feedbackDevolucao.style.color = '#a8071a';
+        return;
+      }
+
+      // Find open movimentacao
+      const openMov = movimentacoes.find(m =>
+        m.ferramenta.toLowerCase() === ferramenta.toLowerCase() &&
+        m.patrimonio === patrimonio &&
+        m.tipo !== 'quebrada' &&
+        (!m.dataRetorno || m.dataRetorno === '')
+      );
+
+      if (!openMov) {
+        feedbackDevolucao.textContent = 'Movimentação não encontrada para este patrimônio.';
+        feedbackDevolucao.classList.remove('hidden');
+        feedbackDevolucao.style.color = '#a8071a';
+        return;
+      }
+
+      try {
+        // Update movimentacao
+        openMov.dataRetorno = dataRetorno;
+        openMov.horaRetorno = horaRetorno;
+        await window.dbManager.movimentacoes.atualizar(openMov.id, openMov);
+
+        // Add back to stock
+        const ferr = estoque.find(f => f.nome === ferramenta);
+        if (ferr && !ferr.patrimonios.includes(patrimonio)) {
+          ferr.patrimonios.push(patrimonio);
+          // Sort patrimonios if needed
+          ferr.patrimonios.sort((a, b) => a.localeCompare(b));
+          await window.dbManager.ferramentas.atualizar(ferr.id, ferr);
+        }
+
+        // Send to Google Sheets
+        try {
+          await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tipo: 'devolucao',
+              ferramenta,
+              patrimonio,
+              dataRetorno,
+              horaRetorno,
+              idMovimentacao: openMov.id
+            })
+          });
+        } catch (fetchError) {
+          console.warn('Erro ao sincronizar devolução com Google Sheets:', fetchError);
+        }
+
+        feedbackDevolucao.textContent = `Devolução de "${patrimonio}" registrada com sucesso!`;
+        feedbackDevolucao.style.color = '#2a7a4a';
+        feedbackDevolucao.classList.remove('hidden');
+        document.getElementById('devolucaoForm').reset();
+        await carregarDados();
+        await atualizarDashboard();
+        setTimeout(() => {
+          feedbackDevolucao.classList.add('hidden');
+        }, 5000);
+      } catch (error) {
+        console.error('Erro ao processar devolução:', error);
+        feedbackDevolucao.textContent = 'Erro ao registrar devolução. Tente novamente.';
+        feedbackDevolucao.style.color = '#a8071a';
+        feedbackDevolucao.classList.remove('hidden');
+      }
+    });
+
+    document.getElementById('formAddFerramenta').addEventListener('submit', async e => {
+      e.preventDefault();
+      const bulkText = document.getElementById('ferramentasBulk').value.trim();
+      if (!bulkText) {
+        alert("Preencha as ferramentas no formato correto.");
+        return;
+      }
+      const lines = bulkText.split('\n').map(line => line.trim()).filter(line => line);
+      for (const line of lines) {
+        const parts = line.split(':');
+        if (parts.length !== 2) {
+          alert(`Formato inválido na linha: ${line}. Use: NomeFerramenta:patrimonio1,patrimonio2`);
+          return;
+        }
+        const nome = parts[0].trim();
+        const patrimonios = parts[1].split(',').map(p => p.trim()).filter(p => p);
+        if (!nome || patrimonios.length === 0) {
+          alert(`Dados inválidos na linha: ${line}`);
+          return;
+        }
+        // Verificar se já existe
+        try {
+          const ferramentasExistentes = await window.dbManager.ferramentas.obterTodas();
+          if (ferramentasExistentes.some(f => f.nome.toLowerCase() === nome.toLowerCase())) {
+            alert(`Ferramenta "${nome}" já existe.`);
+            return;
+          }
+        } catch (error) {
+          console.error('Erro ao verificar ferramentas existentes:', error);
+          alert('Erro ao verificar ferramentas. Verifique o console para mais detalhes.');
+          return;
+        }
+        // Inicializar o banco de dados se necessário
+        if (!window.db) {
+          try {
+            await window.dbManager.init();
+          } catch (error) {
+            console.error('Erro ao inicializar o banco de dados:', error);
+            alert('Erro ao inicializar o banco de dados. Verifique o console para mais detalhes.');
+            return;
+          }
+        }
+
+        // Salvar no banco de dados IndexedDB
+        try {
+          const ferramenta = {
+            nome,
+            patrimonios,
+            dataAdicao: new Date().toISOString()
+          };
+          await window.dbManager.ferramentas.adicionar(ferramenta);
+          console.log('Ferramenta salva no banco de dados:', nome);
+        } catch (error) {
+          console.error('Erro ao salvar ferramenta no banco de dados:', error);
+          alert('Erro ao salvar ferramenta. Verifique o console para mais detalhes.');
+          return;
+        }
+
+        try {
+          await fetch(SCRIPT_URL, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({
+              tipo: 'ferramenta',
+              nome,
+              patrimonios
+            })
+          });
+        } catch (error) {
+          console.warn('Erro ao enviar dados para o servidor, mas os dados foram salvos localmente:', error);
+        }
+      }
+      document.getElementById('formAddFerramenta').reset();
+      document.getElementById('modalFerramenta').style.display = 'none';
+      carregarDados();
+    });
+
+
+
+    document.getElementById('formAddSolicitante').addEventListener('submit', async e => {
+      e.preventDefault();
+      const nome = document.getElementById('nomeSolicitante').value.trim();
+      if (!nome) {
+        alert("Digite nome do solicitante.");
+        return;
+      }
+
+      // Inicializar o banco de dados se necessário
+      if (!window.db) {
+        try {
+          await window.dbManager.init();
+        } catch (error) {
+          console.error('Erro ao inicializar o banco de dados:', error);
+          alert('Erro ao inicializar o banco de dados. Verifique o console para mais detalhes.');
+          return;
+        }
+      }
+
+      // Verificar se já existe
+      try {
+        const solicitantesExistentes = await window.dbManager.solicitantes.obterTodos();
+        if (solicitantesExistentes.some(s => s.nome.toLowerCase() === nome.toLowerCase())) {
+          alert("Solicitante já existe.");
+          return;
+        }
+
+        // Adicionar novo solicitante
+        const novoSolicitante = {
+          nome,
+          dataAdicao: new Date().toISOString()
+        };
+        await window.dbManager.solicitantes.adicionar(novoSolicitante);
+        console.log('Solicitante salvo no banco de dados:', nome);
+      } catch (error) {
+        console.error('Erro ao salvar solicitante no banco de dados:', error);
+        alert('Erro ao salvar solicitante. Verifique o console para mais detalhes.');
+        return;
+      }
+
+      document.getElementById('formAddSolicitante').reset();
+      document.getElementById('modalSolicitante').style.display = 'none';
+      await atualizarSolicitantes();
+    });
+
+    // Radio button logic for "Tem Retorno?"
+    document.querySelectorAll('input[name="temRetorno"]').forEach(radio => {
+      radio.addEventListener('change', function() {
+        const observacaoContainer = document.getElementById('observacaoContainer');
+        if (this.value === 'nao') {
+          observacaoContainer.style.display = 'block';
+        } else {
+          observacaoContainer.style.display = 'none';
+          document.getElementById('observacao').value = '';
+        }
+      });
+    });
+
+    document.getElementById('movimentacaoForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const solicitante = solicitanteSelect.value;
+      const tipo = document.getElementById('tipoMovimentacao').value;
+      const ferramentaVal = ferramentaSelect.value;
+      const patrimonio = patrimonioSelect.value;
+      const dataSaida = document.getElementById('dataSaida').value;
+      const horaSaida = document.getElementById('horaSaida').value;
+      const dataRetorno = document.getElementById('dataRetorno').value;
+      const horaRetorno = document.getElementById('horaRetorno').value;
+      const temRetorno = document.querySelector('input[name="temRetorno"]:checked').value;
+      const observacao = document.getElementById('observacao').value.trim();
+
+      if (!solicitante || !tipo || !ferramentaVal || !patrimonio || !dataSaida || !horaSaida) {
+        feedback.textContent = "Preencha todos os campos obrigatórios.";
+        feedback.style.color = "#a8071a";
+        return;
+      }
+
+      // Determine ferramenta name
+      let ferramentaNome = ferramentaVal;
+      if (ferramentaVal.startsWith('mov-')) {
+        ferramentaNome = ferramentaVal.substring(4);
+      }
+
+      // Inicializar o banco de dados se necessário
+      if (!window.db) {
+        try {
+          await window.dbManager.init();
+        } catch (error) {
+          console.error('Erro ao inicializar o banco de dados:', error);
+          feedback.textContent = "Erro ao inicializar o banco de dados.";
+          feedback.style.color = "#a8071a";
+          return;
+        }
+      }
+
+      // Salvar no banco de dados IndexedDB
+      try {
+        const movimentacao = {
+          solicitante,
+          tipo,
+          ferramenta: ferramentaNome,
+          patrimonio,
+          dataSaida,
+          horaSaida,
+          dataRetorno,
+          horaRetorno,
+          temRetorno,
+          observacao,
+          dataRegistro: new Date().toISOString()
+        };
+
+        await window.dbManager.movimentacoes.adicionar(movimentacao);
+        console.log('Movimentação salva no banco de dados');
+      } catch (error) {
+        console.error('Erro ao salvar movimentação no banco de dados:', error);
+        feedback.textContent = "Erro ao salvar movimentação.";
+        feedback.style.color = "#a8071a";
+        return;
+      }
+
+      // Se for ferramenta quebrada, remover do estoque
+      if (tipo === 'quebrada') {
+        const ferr = estoque.find(f => f.nome === ferramentaNome);
+        if (ferr && ferr.patrimonios.includes(patrimonio)) {
+          ferr.patrimonios = ferr.patrimonios.filter(p => p !== patrimonio);
+          await window.dbManager.ferramentas.atualizar(ferr.id, ferr);
+        }
+      }
+
+      // Tentar fazer o fetch, mas não bloquear em caso de erro
+      try {
+          await fetch(SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tipo: 'movimentacao',
+              solicitante,
+              tipoMov: tipo,
+              ferramenta: ferramentaNome,
+              patrimonio,
+              dataSaida,
+              dataRetorno,
+              temRetorno,
+              observacao
+            })
+          });
+      } catch (error) {
+        console.warn('Erro ao enviar dados para o servidor, mas os dados foram salvos localmente:', error);
+      }
+
+      feedback.textContent = "Movimentação registrada!";
+      feedback.style.color = "#2a7a4a";
+      feedback.classList.remove('hidden');
+      document.getElementById('movimentacaoForm').reset();
+      carregarDados();
+      setTimeout(() => {
+        feedback.classList.add('hidden');
+      }, 5000);
+    });
+
+    // Funções para Planilhas
+    async function carregarPlanilhas() {
+      await carregarRetiradas();
+      await carregarDevolucoes();
+      await carregarQuebradas();
+    }
+
+    async function carregarRetiradas(filtros = {}) {
+      const movimentacoes = await window.dbManager.movimentacoes.obterTodas();
+      let retiradas = movimentacoes.filter(m => m.tipo !== 'quebrada' && (!m.dataRetorno || m.dataRetorno === ''));
+
+      // Aplicar filtros
+      if (filtros.ferramenta) retiradas = retiradas.filter(r => r.ferramenta.toLowerCase().includes(filtros.ferramenta.toLowerCase()));
+      if (filtros.solicitante) retiradas = retiradas.filter(r => r.solicitante.toLowerCase().includes(filtros.solicitante.toLowerCase()));
+      if (filtros.mes) {
+        const [year, month] = filtros.mes.split('-');
+        retiradas = retiradas.filter(r => {
+          const date = new Date(r.dataSaida);
+          return date.getFullYear() == year && date.getMonth() + 1 == month;
+        });
+      }
+
+      // Calcular KPIs
+      const totalRegistros = retiradas.length;
+      const registrosPorMes = {};
+      retiradas.forEach(r => {
+        const date = new Date(r.dataSaida);
+        const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+        registrosPorMes[key] = (registrosPorMes[key] || 0) + 1;
+      });
+      const ferramentasMaisUsadas = {};
+      retiradas.forEach(r => {
+        ferramentasMaisUsadas[r.ferramenta] = (ferramentasMaisUsadas[r.ferramenta] || 0) + 1;
+      });
+      const solicitantesMaisAtivos = {};
+      retiradas.forEach(r => {
+        solicitantesMaisAtivos[r.solicitante] = (solicitantesMaisAtivos[r.solicitante] || 0) + 1;
+      });
+
+      // Exibir KPIs
+      const kpisDiv = document.getElementById('kpisRetiradas');
+      kpisDiv.innerHTML = `
+        <div class="bg-blue-100 p-4 rounded-lg">
+          <h4 class="font-semibold">Total de Registros</h4>
+          <p class="text-2xl">${totalRegistros}</p>
+        </div>
+        <div class="bg-green-100 p-4 rounded-lg">
+          <h4 class="font-semibold">Registros por Mês</h4>
+          <canvas id="chartMesesRetiradas" width="400" height="200"></canvas>
+        </div>
+        <div class="bg-yellow-100 p-4 rounded-lg">
+          <h4 class="font-semibold">Ferramentas Mais Utilizadas</h4>
+          <canvas id="chartFerramentasRetiradas" width="400" height="200"></canvas>
+        </div>
+        <div class="bg-purple-100 p-4 rounded-lg">
+          <h4 class="font-semibold">Solicitantes Mais Ativos</h4>
+          <canvas id="chartSolicitantesRetiradas" width="400" height="200"></canvas>
+        </div>
+      `;
+      // Create charts
+      setTimeout(() => {
+        const ctxMeses = document.getElementById('chartMesesRetiradas');
+        if (ctxMeses) {
+          new Chart(ctxMeses, {
+            type: 'bar',
+            data: {
+              labels: Object.keys(registrosPorMes),
+              datasets: [{
+                label: 'Registros',
+                data: Object.values(registrosPorMes),
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+        }
+        const ctxFerramentas = document.getElementById('chartFerramentasRetiradas');
+        if (ctxFerramentas) {
+          const sortedFerramentas = Object.entries(ferramentasMaisUsadas).sort((a,b)=>b[1]-a[1]).slice(0,5);
+          new Chart(ctxFerramentas, {
+            type: 'bar',
+            data: {
+              labels: sortedFerramentas.map(([f]) => f),
+              datasets: [{
+                label: 'Usos',
+                data: sortedFerramentas.map(([,c]) => c),
+                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                borderColor: 'rgba(255, 206, 86, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+        }
+        const ctxSolicitantes = document.getElementById('chartSolicitantesRetiradas');
+        if (ctxSolicitantes) {
+          const sortedSolicitantes = Object.entries(solicitantesMaisAtivos).sort((a,b)=>b[1]-a[1]).slice(0,5);
+          new Chart(ctxSolicitantes, {
+            type: 'bar',
+            data: {
+              labels: sortedSolicitantes.map(([s]) => s),
+              datasets: [{
+                label: 'Atividades',
+                data: sortedSolicitantes.map(([,c]) => c),
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                borderColor: 'rgba(153, 102, 255, 1)',
+                borderWidth: 1
+              }]
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+        }
+      }, 100);
+
+      // Popular tabela
+      const tableDiv = document.getElementById('tabelaRetiradas');
+      let html = '<table class="min-w-full bg-white"><thead><tr class="bg-gray-200"><th class="px-4 py-2">Solicitante</th><th class="px-4 py-2">Ferramenta</th><th class="px-4 py-2">Patrimônio</th><th class="px-4 py-2">Projeto</th><th class="px-4 py-2">Data Saída</th><th class="px-4 py-2">Hora Saída</th><th class="px-4 py-2">Status</th></tr></thead><tbody>';
+      retiradas.forEach(r => {
+        html += `<tr><td class="border px-4 py-2">${r.solicitante}</td><td class="border px-4 py-2">${r.ferramenta}</td><td class="border px-4 py-2">${r.patrimonio}</td><td class="border px-4 py-2">${r.projeto}</td><td class="border px-4 py-2">${r.dataSaida}</td><td class="border px-4 py-2">${r.horaSaida}</td><td class="border px-4 py-2">Em uso</td></tr>`;
+      });
+      html += '</tbody></table>';
+      tableDiv.innerHTML = html;
+    }
+
+    async function carregarDevolucoes(filtros = {}) {
+      const movimentacoes = await window.dbManager.movimentacoes.obterTodas();
+      let devolucoes = movimentacoes.filter(m => m.dataRetorno && m.dataRetorno !== '');
+
+      // Aplicar filtros
+      if (filtros.ferramenta) devolucoes = devolucoes.filter(d => d.ferramenta.toLowerCase().includes(filtros.ferramenta.toLowerCase()));
+      if (filtros.solicitante) devolucoes = devolucoes.filter(d => d.solicitante.toLowerCase().includes(filtros.solicitante.toLowerCase()));
+      if (filtros.mes) {
+        const [year, month] = filtros.mes.split('-');
+        devolucoes = devolucoes.filter(d => {
+          const date = new Date(d.dataRetorno);
+          return date.getFullYear() == year && date.getMonth() + 1 == month;
+        });
+      }
+
+      // Calcular KPIs
+      const totalRegistros = devolucoes.length;
+      const registrosPorMes = {};
+      devolucoes.forEach(d => {
+        const date = new Date(d.dataRetorno);
+        const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+        registrosPorMes[key] = (registrosPorMes[key] || 0) + 1;
+      });
+      const ferramentasMaisUsadas = {};
+      devolucoes.forEach(d => {
+        ferramentasMaisUsadas[d.ferramenta] = (ferramentasMaisUsadas[d.ferramenta] || 0) + 1;
+      });
+      const solicitantesMaisAtivos = {};
+      devolucoes.forEach(d => {
+        solicitantesMaisAtivos[d.solicitante] = (solicitantesMaisAtivos[d.solicitante] || 0) + 1;
+      });
+      // Tempo médio de uso
+      const tempos = devolucoes.map(d => {
+        const saida = new Date(d.dataSaida + ' ' + d.horaSaida);
+        const retorno = new Date(d.dataRetorno + ' ' + d.horaRetorno);
+        return (retorno - saida) / (1000 * 60 * 60); // horas
+      }).filter(t => t > 0);
+      const tempoMedio = tempos.length > 0 ? (tempos.reduce((a,b)=>a+b,0) / tempos.length).toFixed(2) : 0;
+
+      // Exibir KPIs
+      const kpisDiv = document.getElementById('kpisDevolucoes');
+      kpisDiv.innerHTML = `
+        <div class="bg-blue-100 p-4 rounded-lg">
+          <h4 class="font-semibold">Total de Registros</h4>
+          <p class="text-2xl">${totalRegistros}</p>
+        </div>
+        <div class="bg-green-100 p-4 rounded-lg">
+          <h4 class="font-semibold">Registros por Mês</h4>
+          <p class="text-sm">${Object.entries(registrosPorMes).map(([mes, count]) => `${mes}: ${count}`).join(', ') || 'Nenhum'}</p>
+        </div>
+        <div class="bg-yellow-100 p-4 rounded-lg">
+          <h4 class="font-semibold">Ferramentas Mais Utilizadas</h4>
+          <p class="text-sm">${Object.entries(ferramentasMaisUsadas).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([f,c])=>`${f}: ${c}`).join(', ') || 'Nenhuma'}</p>
+        </div>
+        <div class="bg-purple-100 p-4 rounded-lg">
+          <h4 class="font-semibold">Tempo Médio de Uso</h4>
+          <p class="text-2xl">${tempoMedio} horas</p>
+        </div>
+      `;
+
+      // Popular tabela
+      const tableDiv = document.getElementById('tabelaDevolucoes');
+      let html = '<table class="min-w-full bg-white"><thead><tr class="bg-gray-200"><th class="px-4 py-2">Solicitante</th><th class="px-4 py-2">Ferramenta</th><th class="px-4 py-2">Patrimônio</th><th class="px-4 py-2">Projeto</th><th class="px-4 py-2">Data Retorno</th><th class="px-4 py-2">Hora Retorno</th><th class="px-4 py-2">Status</th></tr></thead><tbody>';
+      devolucoes.forEach(d => {
+        html += `<tr><td class="border px-4 py-2">${d.solicitante}</td><td class="border px-4 py-2">${d.ferramenta}</td><td class="border px-4 py-2">${d.patrimonio}</td><td class="border px-4 py-2">${d.projeto}</td><td class="border px-4 py-2">${d.dataRetorno}</td><td class="border px-4 py-2">${d.horaRetorno}</td><td class="border px-4 py-2">Devolvido</td></tr>`;
+      });
+      html += '</tbody></table>';
+      tableDiv.innerHTML = html;
+    }
+
+    async function carregarQuebradas(filtros = {}) {
+      const movimentacoes = await window.dbManager.movimentacoes.obterTodas();
+      let quebradas = movimentacoes.filter(m => m.tipo === 'quebrada');
+
+      // Aplicar filtros
+      if (filtros.ferramenta) quebradas = quebradas.filter(q => q.ferramenta.toLowerCase().includes(filtros.ferramenta.toLowerCase()));
+      if (filtros.solicitante) quebradas = quebradas.filter(q => q.solicitante.toLowerCase().includes(filtros.solicitante.toLowerCase()));
+      if (filtros.mes) {
+        const [year, month] = filtros.mes.split('-');
+        quebradas = quebradas.filter(q => {
+          const date = new Date(q.dataSaida);
+          return date.getFullYear() == year && date.getMonth() + 1 == month;
+        });
+      }
+
+      // Calcular KPIs
+      const totalRegistros = quebradas.length;
+      const registrosPorMes = {};
+      quebradas.forEach(q => {
+        const date = new Date(q.dataSaida);
+        const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+        registrosPorMes[key] = (registrosPorMes[key] || 0) + 1;
+      });
+      const ferramentasMaisQuebradas = {};
+      quebradas.forEach(q => {
+        ferramentasMaisQuebradas[q.ferramenta] = (ferramentasMaisQuebradas[q.ferramenta] || 0) + 1;
+      });
+      const solicitantesMaisQuebrados = {};
+      quebradas.forEach(q => {
+        solicitantesMaisQuebrados[q.solicitante] = (solicitantesMaisQuebrados[q.solicitante] || 0) + 1;
+      });
+
+      // Exibir KPIs
+      const kpisDiv = document.getElementById('kpisQuebradas');
+      kpisDiv.innerHTML = `
+        <div class="bg-red-100 p-4 rounded-lg">
+          <h4 class="font-semibold">Total de Registros</h4>
+          <p class="text-2xl">${totalRegistros}</p>
+        </div>
+        <div class="bg-orange-100 p-4 rounded-lg">
+          <h4 class="font-semibold">Registros por Mês</h4>
+          <p class="text-sm">${Object.entries(registrosPorMes).map(([mes, count]) => `${mes}: ${count}`).join(', ') || 'Nenhum'}</p>
+        </div>
+        <div class="bg-red-200 p-4 rounded-lg">
+          <h4 class="font-semibold">Ferramentas Mais Quebradas</h4>
+          <p class="text-sm">${Object.entries(ferramentasMaisQuebradas).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([f,c])=>`${f}: ${c}`).join(', ') || 'Nenhuma'}</p>
+        </div>
+        <div class="bg-pink-100 p-4 rounded-lg">
+          <h4 class="font-semibold">Solicitantes com Mais Quebras</h4>
+          <p class="text-sm">${Object.entries(solicitantesMaisQuebrados).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([s,c])=>`${s}: ${c}`).join(', ') || 'Nenhum'}</p>
+        </div>
+      `;
+
+      // Popular tabela
+      const tableDiv = document.getElementById('tabelaQuebradas');
+      let html = '<table class="min-w-full bg-white"><thead><tr class="bg-gray-200"><th class="px-4 py-2">Solicitante</th><th class="px-4 py-2">Ferramenta</th><th class="px-4 py-2">Patrimônio</th><th class="px-4 py-2">Projeto</th><th class="px-4 py-2">Data Saída</th><th class="px-4 py-2">Observação</th><th class="px-4 py-2">Status</th></tr></thead><tbody>';
+      quebradas.forEach(q => {
+        html += `<tr><td class="border px-4 py-2">${q.solicitante}</td><td class="border px-4 py-2">${q.ferramenta}</td><td class="border px-4 py-2">${q.patrimonio}</td><td class="border px-4 py-2">${q.projeto}</td><td class="border px-4 py-2">${q.dataSaida}</td><td class="border px-4 py-2">${q.observacao || ''}</td><td class="border px-4 py-2">Quebrada</td></tr>`;
+      });
+      html += '</tbody></table>';
+      tableDiv.innerHTML = html;
+    }
+
+    // Funções de filtro
+    function filtrarRetiradas() {
+      const filtros = {
+        ferramenta: document.getElementById('filtroRetiradasFerramenta').value,
+        solicitante: document.getElementById('filtroRetiradasSolicitante').value,
+        mes: document.getElementById('filtroRetiradasMes').value
+      };
+      carregarRetiradas(filtros);
+    }
+
+    function limparFiltrosRetiradas() {
+      document.getElementById('filtroRetiradasFerramenta').value = '';
+      document.getElementById('filtroRetiradasSolicitante').value = '';
+      document.getElementById('filtroRetiradasMes').value = '';
+      carregarRetiradas();
+    }
+
+    function filtrarDevolucoes() {
+      const filtros = {
+        ferramenta: document.getElementById('filtroDevolucoesFerramenta').value,
+        solicitante: document.getElementById('filtroDevolucoesSolicitante').value,
+        mes: document.getElementById('filtroDevolucoesMes').value
+      };
+      carregarDevolucoes(filtros);
+    }
+
+    function limparFiltrosDevolucoes() {
+      document.getElementById('filtroDevolucoesFerramenta').value = '';
+      document.getElementById('filtroDevolucoesSolicitante').value = '';
+      document.getElementById('filtroDevolucoesMes').value = '';
+      carregarDevolucoes();
+    }
+
+    function filtrarQuebradas() {
+      const filtros = {
+        ferramenta: document.getElementById('filtroQuebradasFerramenta').value,
+        solicitante: document.getElementById('filtroQuebradasSolicitante').value,
+        mes: document.getElementById('filtroQuebradasMes').value
+      };
+      carregarQuebradas(filtros);
+    }
+
+    function limparFiltrosQuebradas() {
+      document.getElementById('filtroQuebradasFerramenta').value = '';
+      document.getElementById('filtroQuebradasSolicitante').value = '';
+      document.getElementById('filtroQuebradasMes').value = '';
+      carregarQuebradas();
+    }
+
+    // Funções de download
+    function baixarRetiradas() {
+      const table = document.querySelector('#tabelaRetiradas table');
+      if (!table) return;
+      const wb = XLSX.utils.table_to_book(table);
+      XLSX.writeFile(wb, 'retiradas.xlsx');
+    }
+
+    function baixarDevolucoes() {
+      const table = document.querySelector('#tabelaDevolucoes table');
+      if (!table) return;
+      const wb = XLSX.utils.table_to_book(table);
+      XLSX.writeFile(wb, 'devolucoes.xlsx');
+    }
+
+    function baixarQuebradas() {
+      const table = document.querySelector('#tabelaQuebradas table');
+      if (!table) return;
+      const wb = XLSX.utils.table_to_book(table);
+      XLSX.writeFile(wb, 'ferramentas_quebradas.xlsx');
+    }
+
+    async function gerarExcelSincronizado() {
+      try {
+        console.log('Iniciando geração de Excel sincronizado...');
+
+        // Fazer requisição para o servidor local
+        const response = await fetch('http://localhost:8000/api/generate_sync_excel');
+
+        if (!response.ok) {
+          throw new Error(`Erro do servidor: ${response.status} ${response.statusText}`);
+        }
+
+        // Obter o arquivo como blob
+        const blob = await response.blob();
+
+        // Criar URL para download
+        const url = window.URL.createObjectURL(blob);
+
+        // Criar link temporário e clicar para download
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+
+        // Obter nome do arquivo do header Content-Disposition
+        const contentDisposition = response.headers.get('Content-Disposition');
+        let filename = 'relatorio_sincronizado.xlsx';
+        if (contentDisposition) {
+          const match = contentDisposition.match(/filename="(.+)"/);
+          if (match) {
+            filename = match[1];
+          }
+        }
+
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+
+        // Limpar
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        console.log('Excel sincronizado baixado com sucesso');
+
+      } catch (error) {
+        console.error('Erro ao gerar Excel sincronizado:', error);
+        alert('Erro ao gerar o Excel sincronizado. Verifique se o servidor está rodando (execute server_sync.py) e tente novamente.');
+      }
+    }
+
+    async function baixarExcelCompleto() {
+      try {
+        console.log('Iniciando exportação Excel completo...');
+
+        // Obter dados do sistema
+        const movimentacoes = await window.dbManager.movimentacoes.obterTodas();
+        const ferramentas = await window.dbManager.ferramentas.obterTodas();
+        const projetos = await window.dbManager.projetos.obterTodos();
+        const solicitantes = await window.dbManager.solicitantes.obterTodos();
+
+        console.log('Dados obtidos:', { movimentacoes: movimentacoes.length, ferramentas: ferramentas.length, projetos: projetos.length, solicitantes: solicitantes.length });
+
+        // Criar workbook
+        const wb = XLSX.utils.book_new();
+
+        // Aba 1: Retiradas (ferramentas em uso)
+        const retiradasData = movimentacoes.filter(m => m.tipo !== 'quebrada' && (!m.dataRetorno || m.dataRetorno === '')).map(mov => ({
+            'Solicitante': mov.solicitante || '',
+            'Ferramenta': mov.ferramenta || '',
+            'Patrimônio': mov.patrimonio || '',
+            'Projeto': mov.projeto || '',
+            'Data Saída': mov.dataSaida || '',
+            'Hora Saída': mov.horaSaida || '',
+            'Status': 'Em uso'
+        }));
+        const wsRetiradas = XLSX.utils.json_to_sheet(retiradasData);
+        XLSX.utils.book_append_sheet(wb, wsRetiradas, 'Retiradas');
+
+        // Aba 2: Devoluções
+        const devolucoesData = movimentacoes.filter(m => m.dataRetorno && m.dataRetorno !== '').map(mov => ({
+            'Solicitante': mov.solicitante || '',
+            'Ferramenta': mov.ferramenta || '',
+            'Patrimônio': mov.patrimonio || '',
+            'Projeto': mov.projeto || '',
+            'Data Retorno': mov.dataRetorno || '',
+            'Hora Retorno': mov.horaRetorno || '',
+            'Status': 'Devolvido'
+        }));
+        const wsDevolucoes = XLSX.utils.json_to_sheet(devolucoesData);
+        XLSX.utils.book_append_sheet(wb, wsDevolucoes, 'Devoluções');
+
+        // Aba 3: Ferramentas Quebradas
+        const quebradasData = movimentacoes.filter(m => m.tipo === 'quebrada').map(mov => ({
+            'Solicitante': mov.solicitante || '',
+            'Ferramenta': mov.ferramenta || '',
+            'Patrimônio': mov.patrimonio || '',
+            'Projeto': mov.projeto || '',
+            'Data Saída': mov.dataSaida || '',
+            'Observação': mov.observacao || '',
+            'Status': 'Quebrada'
+        }));
+        const wsQuebradas = XLSX.utils.json_to_sheet(quebradasData);
+        XLSX.utils.book_append_sheet(wb, wsQuebradas, 'Ferramentas Quebradas');
+
+        // Aba 4: Estoque (dados administrativos)
+        const estoqueData = [];
+
+        // Adicionar ferramentas
+        ferramentas.forEach(f => {
+            estoqueData.push({
+                'Tipo': 'Ferramenta',
+                'Nome': f.nome || '',
+                'Patrimônios': f.patrimonios ? f.patrimonios.join(', ') : '',
+                'Quantidade': f.patrimonios ? f.patrimonios.length : 0
+            });
+        });
+
+        // Adicionar projetos
+        projetos.forEach(p => {
+            estoqueData.push({
+                'Tipo': 'Projeto',
+                'Nome': p.nome || '',
+                'Patrimônios': '',
+                'Quantidade': ''
+            });
+        });
+
+        // Adicionar solicitantes
+        solicitantes.forEach(s => {
+            estoqueData.push({
+                'Tipo': 'Solicitante',
+                'Nome': s.nome || '',
+                'Patrimônios': '',
+                'Quantidade': ''
+            });
+        });
+
+        const wsEstoque = XLSX.utils.json_to_sheet(estoqueData);
+        XLSX.utils.book_append_sheet(wb, wsEstoque, 'Estoque');
+
+        // Baixar o arquivo
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
+        XLSX.writeFile(wb, `relatorio_completo_${timestamp}.xlsx`);
+
+        console.log('Excel gerado com sucesso');
+
+      } catch (error) {
+        console.error('Erro ao gerar Excel completo:', error);
+        alert('Erro ao gerar o arquivo Excel. Verifique o console para mais detalhes.');
+      }
+    }
+
+    // Modificar abrirModal para carregar planilhas
+    const originalAbrirModal = window.abrirModal;
+    window.abrirModal = async (id) => {
+      originalAbrirModal(id);
+      if (id === 'modalPlanilhas') {
+        carregarPlanilhas();
+      } else if (id === 'modalVerFerramentas') {
+        await mostrarVerFerramentas();
+      } else if (id === 'modalVerProjetos') {
+        await mostrarVerProjetos();
+      } else if (id === 'modalVerSolicitantes') {
+        await mostrarVerSolicitantes();
+      }
+    };
+
+    async function mostrarVerFerramentas() {
+      const div = document.getElementById('listaVerFerramentas');
+      div.innerHTML = '';
+      const groupedFerramentas = {};
+      estoque.forEach(item => {
+        if (!groupedFerramentas[item.nome]) {
+          groupedFerramentas[item.nome] = { ids: [], patrimonios: [] };
+        }
+        groupedFerramentas[item.nome].ids.push(item.id);
+        groupedFerramentas[item.nome].patrimonios.push(...item.patrimonios);
+      });
+      Object.keys(groupedFerramentas).forEach((nome) => {
+        const data = groupedFerramentas[nome];
+        const card = document.createElement('div');
+        card.className = 'tool-card rounded-xl p-4';
+        card.innerHTML = `
+          <div class="flex justify-between items-start">
+            <h3 class="text-lg font-semibold gradient-text">${nome}</h3>
+            <span class="bg-purple-100 text-purple-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
+              Qtd: ${data.patrimonios.length}
+            </span>
+          </div>
+          <div class="mt-3 text-sm text-gray-600">
+            <p class="mb-2"><i class="fas fa-hashtag mr-1"></i>Patrimônios:</p>
+            <div class="flex flex-wrap gap-1">
+              ${data.patrimonios.map(p => `<span class="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded">${p}</span>`).join('')}
+            </div>
+          </div>
+        `;
+        div.appendChild(card);
+      });
+    }
+
+    async function mostrarVerProjetos() {
+      const div = document.getElementById('listaVerProjetos');
+      div.innerHTML = '';
+      projetos.forEach((proj) => {
+        const li = document.createElement('li');
+        li.className = 'glass-effect rounded-lg p-3';
+        li.innerHTML = `
+          <span class="text-white"><i class="fas fa-folder mr-2"></i>${proj.nome}</span>
+        `;
+        div.appendChild(li);
+      });
+    }
+
+    async function mostrarVerSolicitantes() {
+      const div = document.getElementById('listaVerSolicitantes');
+      div.innerHTML = '';
+      const solicitantes = await window.dbManager.solicitantes.obterTodos();
+      solicitantes.forEach((s) => {
+        const li = document.createElement('li');
+        li.className = 'glass-effect rounded-lg p-3';
+        li.innerHTML = `
+          <span class="text-white"><i class="fas fa-user mr-2"></i>${s.nome}</span>
+        `;
+        div.appendChild(li);
+      });
+    }
+
+    async function atualizarDashboard() {
+      const movimentacoes = await window.dbManager.movimentacoes.obterTodas();
+      const dashboardsDiv = document.getElementById('dashboards');
+      dashboardsDiv.innerHTML = ''; // Clear existing charts
+
+      // Calculate KPIs
+      const retiradas = movimentacoes.filter(m => m.tipo !== 'quebrada' && (!m.dataRetorno || m.dataRetorno === ''));
+      const devolucoes = movimentacoes.filter(m => m.dataRetorno && m.dataRetorno !== '');
+      const quebradas = movimentacoes.filter(m => m.tipo === 'quebrada');
+
+      // Ferramentas mais usadas (from all movimentacoes)
+      const ferramentasCount = {};
+      movimentacoes.forEach(m => {
+        ferramentasCount[m.ferramenta] = (ferramentasCount[m.ferramenta] || 0) + 1;
+      });
+      const topFerramentas = Object.entries(ferramentasCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
+
+      // Solicitantes mais ativos
+      const solicitantesCount = {};
+      movimentacoes.forEach(m => {
+        solicitantesCount[m.solicitante] = (solicitantesCount[m.solicitante] || 0) + 1;
+      });
+      const topSolicitantes = Object.entries(solicitantesCount).sort((a,b) => b[1] - a[1]).slice(0, 5);
+
+      // Create chart containers
+      const charts = [
+        { title: 'Total Retiradas', value: retiradas.length, color: 'blue' },
+        { title: 'Total Devoluções', value: devolucoes.length, color: 'green' },
+        { title: 'Ferramentas Quebradas', value: quebradas.length, color: 'red' },
+        { title: 'Ferramentas Mais Usadas', data: topFerramentas, type: 'bar', color: 'yellow' },
+        { title: 'Solicitantes Mais Ativos', data: topSolicitantes, type: 'bar', color: 'purple' },
+        { title: 'Distribuição por Tipo', data: [
+          { label: 'Retiradas', value: retiradas.length },
+          { label: 'Devoluções', value: devolucoes.length },
+          { label: 'Quebradas', value: quebradas.length }
+        ], type: 'pie', color: 'teal' }
+      ];
+
+      charts.forEach((chart, index) => {
+        const card = document.createElement('div');
+        card.className = 'glass-effect rounded-2xl p-6';
+        card.innerHTML = `
+          <h3 class="text-xl font-bold text-white mb-4">${chart.title}</h3>
+          <canvas id="chart-${index}" width="400" height="200"></canvas>
+        `;
+        dashboardsDiv.appendChild(card);
+
+        setTimeout(() => {
+          const ctx = document.getElementById(`chart-${index}`);
+          if (ctx) {
+            if (chart.type === 'bar') {
+              new Chart(ctx, {
+                type: 'bar',
+                data: {
+                  labels: chart.data.map(d => d[0]),
+                  datasets: [{
+                    label: 'Quantidade',
+                    data: chart.data.map(d => d[1]),
+                    backgroundColor: `rgba(${chart.color === 'yellow' ? '255, 206, 86' : chart.color === 'purple' ? '153, 102, 255' : '75, 192, 192'}, 0.2)`,
+                    borderColor: `rgba(${chart.color === 'yellow' ? '255, 206, 86' : chart.color === 'purple' ? '153, 102, 255' : '75, 192, 192'}, 1)`,
+                    borderWidth: 1
+                  }]
+                },
+                options: {
+                  scales: {
+                    y: {
+                      beginAtZero: true
+                    }
+                  }
+                }
+              });
+            } else if (chart.type === 'pie') {
+              new Chart(ctx, {
+                type: 'pie',
+                data: {
+                  labels: chart.data.map(d => d.label),
+                  datasets: [{
+                    data: chart.data.map(d => d.value),
+                    backgroundColor: [
+                      'rgba(54, 162, 235, 0.2)',
+                      'rgba(75, 192, 192, 0.2)',
+                      'rgba(255, 99, 132, 0.2)'
+                    ],
+                    borderColor: [
+                      'rgba(54, 162, 235, 1)',
+                      'rgba(75, 192, 192, 1)',
+                      'rgba(255, 99, 132, 1)'
+                    ],
+                    borderWidth: 1
+                  }]
+                }
+              });
+            } else {
+              // Simple value display
+              ctx.style.display = 'none';
+              const valueDiv = document.createElement('div');
+              valueDiv.className = 'text-center';
+              valueDiv.innerHTML = `<p class="text-4xl font-bold text-white">${chart.value}</p>`;
+              card.appendChild(valueDiv);
+            }
+          }
+        }, 100);
+      });
+    }
+
+    function limparNotificacoes() {
+      if (confirm("Tem certeza que deseja limpar todas as notificações?")) {
+        notificacoesDiv.innerHTML = '<p class="text-center text-gray-500 py-4">Nenhuma notificação</p>';
+      }
+    }
+
+    window.onload = async () => {
+      await carregarDados();
+    };
+  </script>
+</body>
+</html>
